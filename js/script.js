@@ -10,18 +10,39 @@ function secondsToMinutesSeconds(seconds) {
     return `${String(minutes).padStart(2,"0")}:${String(remainingSeconds).padStart(2,"0")}`;
 }
 
-// Play a song
-function playMusic(track, pause=false){
-    if(!track) return;
+function playMusic(track, pause = false) {
+    if (!track) return;
+
     currentSong.src = track;
-    if(!pause){
+
+    if (!pause) {
         currentSong.play();
-        document.querySelector("#play").src="img/pause.svg";
+        document.querySelector("#play").src = "img/pause.svg";
     }
-    const songName = decodeURIComponent(track.split("/").pop().replace(".mp3",""));
+
+    const songName = decodeURIComponent(track.split("/").pop().replace(".mp3", ""));
     document.querySelector(".songinfo").innerText = songName;
     document.querySelector(".songtime").innerText = "00:00 / 00:00";
+
+    // ✅ When the song ends, reset everything
+    currentSong.addEventListener("ended", () => {
+        // Reset audio to start
+        currentSong.currentTime = 0;
+
+        // Reset seekbar circle position
+        const circle = document.querySelector(".circle");
+        if (circle) circle.style.left = "0%";
+
+        // Reset time text
+        const songTime = document.querySelector(".songtime");
+        if (songTime) songTime.innerText = "00:00 / 00:00";
+
+        // Change pause icon back to play
+        const playBtn = document.querySelector("#play");
+        if (playBtn) playBtn.src = "img/play.svg";
+    });
 }
+
 
 // Get songs from folder using songs.json
 async function getSongs(folder){
