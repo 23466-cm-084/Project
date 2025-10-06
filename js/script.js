@@ -19,8 +19,9 @@ function secondsToMinutesSeconds(seconds) {
 
 async function getSongs(folder) {
     currFolder = folder;
-    let a = await fetch(`/${folder}/`)
-    let response = await a.text();
+    let a = await fetch('https://23466-cm-084.github.io/Project/songs/index.json');
+    let response = await a.json();
+    songs = allAlbums[folder];
     let div = document.createElement("div")
     div.innerHTML = response;
     let as = div.getElementsByTagName("a")
@@ -73,22 +74,25 @@ const playMusic = (track, pause = false) => {
 }
 
 async function displayAlbums() {
-    console.log("displaying albums")
-    let a = await fetch(`/songs/`)
-    let response = await a.text();
-    let div = document.createElement("div")
-    div.innerHTML = response;
-    let anchors = div.getElementsByTagName("a")
-    let cardContainer = document.querySelector(".cardContainer")
-    let array = Array.from(anchors)
-    for (let index = 0; index < array.length; index++) {
-        const e = array[index]; 
-        if (e.href.includes("/songs") && !e.href.includes(".htaccess")) {
-            let folder = e.href.split("/").slice(-2)[0]
-            // Get the metadata of the folder
-            let a = await fetch(`/songs/${folder}/info.json`)
-            let response = await a.json(); 
-            cardContainer.innerHTML = cardContainer.innerHTML + ` <div data-folder="${folder}" class="card">
+    console.log("Loading albums from index.json...");
+
+    // Fetch your albums list
+    const res = await fetch("https://23466-cm-084.github.io/Project/songs/index.json");
+    const data = await res.json();
+
+    // Clear previous cards
+    const cardContainer = document.querySelector(".cardContainer");
+    cardContainer.innerHTML = "";
+
+    // Loop through each album (folder) listed in index.json
+    for (const folder of data.albums) {
+        // Fetch info.json for album details
+        const songRes = await fetch(`https://23466-cm-084.github.io/Project/songs/${folder}/info.json`);
+        const info = await songRes.json();
+
+        // Add album card to the page
+        cardContainer.innerHTML += `
+        <div data-folder="${folder}" class="card">
             <div class="play">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                     xmlns="http://www.w3.org/2000/svg">
@@ -96,24 +100,22 @@ async function displayAlbums() {
                         stroke-linejoin="round" />
                 </svg>
             </div>
-
-            <img src="/songs/${folder}/cover.jpg" alt="">
-            <h2>${response.title}</h2>
-            <p>${response.description}</p>
-        </div>`
-        }
+            <img src="https://23466-cm-084.github.io/Project/songs/${folder}/cover.jpg" alt="">
+            <h3>${info.title}</h3>
+            <p>${info.description}</p>
+        </div>`;
     }
 
-    // Load the playlist whenever card is clicked
-    Array.from(document.getElementsByClassName("card")).forEach(e => { 
+    // Add click listeners to load songs when a card is clicked
+    Array.from(document.getElementsByClassName("card")).forEach(e => {
         e.addEventListener("click", async item => {
-            console.log("Fetching Songs")
-            songs = await getSongs(`songs/${item.currentTarget.dataset.folder}`)  
-            playMusic(songs[0])
-
-        })
-    })
+            songs = await getSongs(item.currentTarget.dataset.folder);
+            playMusic(songs[0]);
+            document.querySelector(".left").style.left = "0";
+        });
+    });
 }
+
 
 async function main() {
     // Get the list of all the songs
