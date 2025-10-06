@@ -85,7 +85,7 @@ async function displayAlbums() {
     cardContainer.innerHTML = "";
 
     // Loop through each album (folder) listed in index.json
-    for (const folder of data.albums) {
+    for (const folder of data.`${folder}`) {
         // Fetch info.json for album details
         const songRes = await fetch(`https://23466-cm-084.github.io/Project/songs/${folder}/info.json`);
         const info = await songRes.json();
