@@ -17,49 +17,33 @@ function secondsToMinutesSeconds(seconds) {
     return `${formattedMinutes}:${formattedSeconds}`;
 }
 
-async function getSongs(folder) {
+async function getSongs(folder){
     currFolder = folder;
-    let a = await fetch(`https://23466-cm-084.github.io/Project/songs/${folder}/songs.json`)
-    let response = await a.json();
-    songs = response[folder];
-    let div = document.createElement("div")
-    div.innerHTML = response;
-    let as = div.getElementsByTagName("a")
-    songs = []
-    for (let index = 0; index < as.length; index++) {
-        const element = as[index];
-        if (element.href.endsWith(".mp3")) {
-            songs.push(element.href.split(`/${folder}/`)[1])
-        }
-    }
- 
 
+    const res = await fetch(`https://23466-cm-084.github.io/Project/songs/${folder}/songs.json`);
+    const data = await res.json(); // array of filenames
+    songs = data;
 
-    // Show all the songs in the playlist
-    let songUL = document.querySelector(".songList").getElementsByTagName("ul")[0]
-    songUL.innerHTML = ""
-    for (const song of songs) {
-        songUL.innerHTML = songUL.innerHTML + `<li><img class="invert" width="34" src="img/music.svg" alt="">
-                            <div class="info">
-                                <div> ${song.replaceAll("%20", " ")}</div>
-                                <div>Harry</div>
-                            </div>
-                            <div class="playnow">
-                                <span>Play Now</span>
-                                <img class="invert" src="img/play.svg" alt="">
-                            </div> </li>`;
-    }
+    const songUL = document.querySelector(".songList ul");
+    songUL.innerHTML = "";
 
-    // Attach an event listener to each song
-    Array.from(document.querySelector(".songList").getElementsByTagName("li")).forEach(e => {
-        e.addEventListener("click", element => {
-            playMusic(e.querySelector(".info").firstElementChild.innerHTML.trim())
+    songs.forEach(song => {
+        const li = document.createElement("li");
+        li.innerHTML = `
+            <img src="img/music.svg" class="invert" alt="">
+            <div class="info"><div>${song}</div><div>Billu Bhai</div></div>
+            <div class="playnow"><span>Play Now</span><img src="img/play.svg" class="invert"></div>
+        `;
+        li.addEventListener("click", () => {
+            // ✅ use the filename from the array, not innerText
+            playMusic(`https://23466-cm-084.github.io/Project/songs/${folder}/${song}`);
+        });
+        songUL.appendChild(li);
+    });
 
-        })
-    })
-
-    return songs
+    return songs;
 }
+
 
 const playMusic = (track, pause = false) => {
     currentSong.src = `/${currFolder}/` + track
