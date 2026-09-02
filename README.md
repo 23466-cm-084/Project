@@ -1,3 +1,4 @@
+```
 from collections import deque
 def bfs_nearest_exit(grid, start, exits):
   rows, cols = len(grid), len(grid[0])
@@ -75,3 +76,4 @@ def bfs_nearest_exit(grid, start, exits):
               print("Number of Steps:" len(path))
 
       exp1_bfs()
+```
